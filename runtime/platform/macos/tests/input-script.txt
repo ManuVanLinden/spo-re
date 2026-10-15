@@ -1,0 +1,110 @@
+# Reference input script for the host test app (tests/hostapp.m, --script mode).
+# Written BEFORE the implementation, together with tests/expected-wm.log.
+#
+# Every step ends with one pump pass that mirrors the game's pump 0x8482f0:
+#   InvalidateRect(hwnd, NULL, FALSE); while (PeekMessageW(PM_REMOVE)) { if WM_QUIT stop; TranslateMessage; DispatchMessageW }
+# Events are real NSEvents posted to the AppKit queue with [NSApp postEvent:atStart:NO]; the pump drains them.
+# Window: client 640x480 points.  Key codes are macOS kVK_* values (hex).
+#
+# key  <down|up|repeat> <kvk> [chars=<utf16 hex,...>] [ign=<utf16 hex,...>] [mods=shift,ctrl,alt,cmd]
+# flags <kvk> <down|up|on|off>          modifier key transition (flagsChanged); on/off is caps lock
+# mouse <move|down|up|drag> <left|right|none> <x> <y> [clicks=N]
+# wheel <lines>                          classic wheel, + = away from the user
+# resize <w> <h>                         programmatic content-size change, top-left kept
+# activate | deactivate | close | show
+# post <msg> <wparam> <lparam>           PostMessage from a separate pthread (joined before the pump)
+
+step show
+show
+
+step key_a
+key down 0x00 chars=61
+key up 0x00 chars=61
+
+step shift_b
+flags 0x38 down
+key down 0x0B chars=42 ign=42 mods=shift
+key up 0x0B chars=42 ign=42 mods=shift
+flags 0x38 up
+
+step repeat_j
+key down 0x26 chars=6a
+key repeat 0x26 chars=6a
+key repeat 0x26 chars=6a
+key up 0x26 chars=6a
+
+step cmd_c_as_ctrl
+flags 0x37 down
+key down 0x08 chars=63 ign=63 mods=cmd
+key up 0x08 chars=63 ign=63 mods=cmd
+flags 0x37 up
+
+step alt_x
+flags 0x3A down
+key down 0x07 chars=2248 ign=78 mods=alt
+key up 0x07 chars=2248 ign=78 mods=alt
+flags 0x3A up
+
+step alt_alone
+flags 0x3A down
+flags 0x3A up
+
+step caps
+flags 0x39 on
+flags 0x39 off
+
+step specials
+key down 0x35 chars=1b
+key up 0x35 chars=1b
+key down 0x33 chars=7f
+key up 0x33 chars=7f
+key down 0x4C chars=3
+key up 0x4C chars=3
+key down 0x57 chars=35
+key up 0x57 chars=35
+key down 0x60 chars=f708
+key up 0x60 chars=f708
+key down 0x7B chars=f702
+key up 0x7B chars=f702
+
+step mouse_move
+mouse move none 100 50
+mouse move none 120 60
+
+step click
+mouse down left 200 100 clicks=1
+mouse up left 200 100 clicks=1
+
+step dblclick
+mouse down left 200 100 clicks=1
+mouse up left 200 100 clicks=1
+mouse down left 200 100 clicks=2
+mouse up left 200 100 clicks=2
+
+step right_drag
+mouse down right 300 200 clicks=1
+mouse drag right 310 210
+mouse drag right 320 220
+mouse up right 320 220 clicks=1
+
+step wheel
+wheel 1
+wheel -2
+
+step resize
+resize 800 600
+
+step order
+key down 0x00 chars=61
+key up 0x00 chars=61
+post 0x500 0x1 0x2
+post 0x501 0x3 0x4
+
+step deactivate
+deactivate
+
+step activate
+activate
+
+step close
+close

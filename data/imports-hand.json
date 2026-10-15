@@ -1,0 +1,268 @@
+{
+ "about": "The hand-made sections of data/imports.json: com_surface (COM vtable-call counts named by hand) and dynamic_apis (GetProcAddress sites read by hand). Edited by hand; tools/imports/build_table.py --hand-sections copies these two keys into the generated data/imports.json (the converter's imports stage).",
+ "com_surface": {
+  "note": "Lower bound from a heuristic COM vtable-call counter: only calls reached by `mov r,[global]; mov r2,[r]; call [r2+off]` within 14 instructions. Device pointers cached elsewhere are not counted.",
+  "IDirect3D9": {
+   "global_ptr": "0x16f89c8",
+   "created_at": "0x11f84ee (Direct3DCreate9(32)); D3DXCheckVersion(32,27) at 0x11f8502",
+   "methods": {
+    "Release": 4,
+    "GetAdapterIdentifier": 1,
+    "GetAdapterModeCount": 2,
+    "EnumAdapterModes": 1,
+    "GetAdapterDisplayMode": 1,
+    "CheckDepthStencilMatch": 1,
+    "GetDeviceCaps": 4,
+    "CreateDevice": 1
+   }
+  },
+  "IDirect3DDevice9": {
+   "global_ptr": "0x16f89d0",
+   "created_at": "CreateDevice call at 0x11f877e (present params at 0x16f8b9c)",
+   "global_load_sites": 285,
+   "interface_methods": 119,
+   "methods": {
+    "Release": 1,
+    "TestCooperativeLevel": 2,
+    "EvictManagedResources": 2,
+    "CreateAdditionalSwapChain": 1,
+    "Reset": 1,
+    "Present": 1,
+    "CreateCubeTexture": 1,
+    "CreateVertexBuffer": 3,
+    "CreateIndexBuffer": 3,
+    "GetRenderTargetData": 1,
+    "SetRenderTarget": 2,
+    "GetRenderTarget": 2,
+    "SetDepthStencilSurface": 2,
+    "GetDepthStencilSurface": 2,
+    "BeginScene": 1,
+    "EndScene": 1,
+    "Clear": 1,
+    "SetTransform": 1,
+    "SetViewport": 2,
+    "SetRenderState": 2,
+    "SetTexture": 3,
+    "SetTextureStageState": 2,
+    "SetSamplerState": 2,
+    "SetPaletteEntries": 3,
+    "SetCurrentTexturePalette": 3,
+    "SetSoftwareVertexProcessing": 1,
+    "DrawPrimitive": 2,
+    "CreateVertexDeclaration": 1,
+    "SetVertexDeclaration": 1,
+    "CreateVertexShader": 1,
+    "SetVertexShader": 5,
+    "SetVertexShaderConstantF": 41,
+    "SetVertexShaderConstantI": 2,
+    "SetVertexShaderConstantB": 3,
+    "SetStreamSource": 6,
+    "SetIndices": 3,
+    "CreatePixelShader": 1,
+    "SetPixelShader": 5,
+    "SetPixelShaderConstantF": 2,
+    "SetPixelShaderConstantI": 2,
+    "SetPixelShaderConstantB": 2,
+    "CreateQuery": 1
+   }
+  }
+ },
+ "dynamic_apis": [
+  {
+   "module": "xinput1_1.dll / xinput9_1_0.dll",
+   "functions": [
+    "XInputGetState",
+    "XInputSetState",
+    "XInputGetCapabilities",
+    "XInputGetDSoundAudioDeviceGuids"
+   ],
+   "sites": "0x8d342d-0x8d3482",
+   "purpose": "gamepad (inferred)"
+  },
+  {
+   "module": "nvapi.dll",
+   "functions": [
+    "nvapi_QueryInterface"
+   ],
+   "sites": "0x11e176c,0x11e1788",
+   "purpose": "NVIDIA driver query (SLI/driver info, inferred)"
+  },
+  {
+   "module": "gdi32.dll",
+   "functions": [
+    "D3DKMTOpenAdapterFromHdc",
+    "D3DKMTEscape"
+   ],
+   "sites": "0x11e1e0b-0x11e1e42",
+   "purpose": "WDDM adapter escape, GPU vendor driver query (inferred)"
+  },
+  {
+   "module": "user32.dll",
+   "functions": [
+    "EnumDisplayDevicesA"
+   ],
+   "sites": "0x11e1dae,0x11e1de0",
+   "purpose": "same GPU-query module as D3DKMT"
+  },
+  {
+   "module": "user32.dll",
+   "functions": [
+    "TrackMouseEvent"
+   ],
+   "sites": "0x847caa,0x847cb1",
+   "purpose": "mouse leave tracking"
+  },
+  {
+   "module": "ntdll",
+   "functions": [
+    "TGGetOS"
+   ],
+   "sites": "0x6b8135,0x6b8145",
+   "purpose": "detects TransGaming Cider (Mac wrapper); string 'MacOSX' adjacent (inferred)"
+  },
+  {
+   "module": "kernel32.dll",
+   "functions": [
+    "GetProductInfo"
+   ],
+   "sites": "0x6b8744,0x91b893",
+   "purpose": "OS edition for system-info report"
+  },
+  {
+   "module": "kernel32.dll",
+   "functions": [
+    "ReadDirectoryChangesW"
+   ],
+   "sites": "0x1300285",
+   "purpose": "directory watching"
+  },
+  {
+   "module": "Kernel32.dll (W)",
+   "functions": [
+    "GetModuleFileNameW"
+   ],
+   "sites": "0x92b874"
+  },
+  {
+   "module": "shell32.dll (W)",
+   "functions": [
+    "ShellExecuteW"
+   ],
+   "sites": "0x935e03"
+  },
+  {
+   "module": "DbgHelp.dll",
+   "functions": [
+    "SymInitialize",
+    "SymCleanup",
+    "StackWalk",
+    "SymFunctionTableAccess",
+    "SymGetModuleBase",
+    "SymGetSymFromAddr",
+    "SymGetLineFromAddr",
+    "MiniDumpWriteDump"
+   ],
+   "sites": "0x91b5ed-0x91b654,0x91e42f",
+   "purpose": "crash handler / minidump"
+  },
+  {
+   "module": "dbghelp (handle from global)",
+   "functions": [
+    "SymInitialize",
+    "SymGetOptions",
+    "SymSetOptions",
+    "SymGetSymFromAddr",
+    "StackWalk64",
+    "SymFunctionTableAccess64",
+    "SymGetModuleBase64",
+    "SymGetLineFromAddr64"
+   ],
+   "sites": "0x107f2a3-0x107f347"
+  },
+  {
+   "module": "DasmX86Dll.dll",
+   "functions": [
+    "DasmX86_init",
+    "DasmX86_cleanup",
+    "DasmX86_disasm",
+    "DasmX86_format_insn"
+   ],
+   "sites": "0x91b8cb-0x91b914",
+   "purpose": "optional crash-report disassembler; 'DLL not found, no disassembly.'"
+  },
+  {
+   "module": "psapi.dll",
+   "functions": [
+    "EnumProcessModules",
+    "GetModuleFileNameExA",
+    "GetModuleBaseNameA",
+    "GetModuleInformation"
+   ],
+   "sites": "0x91fa5f-0x91fab5"
+  },
+  {
+   "module": "rasapi32.dll",
+   "functions": [
+    "RasEnumConnectionsA",
+    "RasEnumEntriesA",
+    "RasGetProjectionInfoA",
+    "RasGetEntryDialParamsA",
+    "RasDialA",
+    "RasGetConnectStatusA",
+    "RasHangUpA"
+   ],
+   "sites": "0x94c239-0x94c2d2",
+   "purpose": "dial-up detection in EA networking (inferred)"
+  },
+  {
+   "module": "ADVAPI32/KERNEL32/NETAPI32/USER32 (OpenSSL 0.9.8g rand_win.c RAND_poll)",
+   "functions": [
+    "NetStatisticsGet",
+    "NetApiBufferFree",
+    "CryptAcquireContextW",
+    "CryptGenRandom",
+    "CryptReleaseContext",
+    "GetForegroundWindow",
+    "GetCursorInfo",
+    "GetQueueStatus",
+    "CreateToolhelp32Snapshot",
+    "CloseToolhelp32Snapshot",
+    "Heap32First",
+    "Heap32Next",
+    "Heap32ListFirst",
+    "Heap32ListNext",
+    "Process32First",
+    "Process32Next",
+    "Thread32First",
+    "Thread32Next",
+    "Module32First",
+    "Module32Next"
+   ],
+   "sites": "0x11aa34b-0x11aa6b0",
+   "purpose": "entropy gathering"
+  },
+  {
+   "module": "OpenSSL DSO win32 method (vtable 0x15cfe20)",
+   "functions": [
+    "<runtime name>"
+   ],
+   "sites": "0x11dfdd2,0x11dff96,0x11e0056",
+   "purpose": "generic dlopen for OpenSSL engines; likely unused"
+  },
+  {
+   "module": "EA plugin DLL (name from object)",
+   "functions": [
+    "EASharedLibraryStartupFunction"
+   ],
+   "sites": "0x936577-0x9368f9",
+   "purpose": "UTF SharedLibraryRegistry"
+  },
+  {
+   "module": "plugin DLL (name from object)",
+   "functions": [
+    "oaPluginInit"
+   ],
+   "sites": "0x7db1ad,0x7db1d4"
+  }
+ ]
+}

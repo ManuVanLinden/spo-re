@@ -1,0 +1,358 @@
+{
+ "method": "boundaries set by hand at 8-16 KB granularity from the .rdata strings each .text range references (library version banners, __FILE__ paths, error tables) and the allocation tags referenced from code; names from the dominant tags and strings in each range; boundaries approximate (+-16 KB)",
+ "regions": [
+  {
+   "start": "0x401000",
+   "end": "0x4d8000",
+   "kind": "game",
+   "name": "Editor (creature/building editors, baker, block data)",
+   "bytes": 880640,
+   "funcs_union": 2280,
+   "funcs_ghidra": 2248
+  },
+  {
+   "start": "0x4d8000",
+   "end": "0x4e0000",
+   "kind": "game",
+   "name": "Simulator summarizers (species/plant profiles)",
+   "bytes": 32768,
+   "funcs_union": 48,
+   "funcs_ghidra": 48
+  },
+  {
+   "start": "0x4e0000",
+   "end": "0x540000",
+   "kind": "game",
+   "name": "Skinner + skin-paint ArgScript (procedural creature texturing)",
+   "bytes": 393216,
+   "funcs_union": 922,
+   "funcs_ghidra": 909
+  },
+  {
+   "start": "0x540000",
+   "end": "0x5a0000",
+   "kind": "game",
+   "name": "Editor/Pollinator/OTDB (asset metadata, editor property lists)",
+   "bytes": 393216,
+   "funcs_union": 1385,
+   "funcs_ghidra": 1293
+  },
+  {
+   "start": "0x5a0000",
+   "end": "0x670000",
+   "kind": "game",
+   "name": "UI layer (Sporepedia, tooltips, MVJ, thumbnails)",
+   "bytes": 851968,
+   "funcs_union": 3455,
+   "funcs_ghidra": 2711
+  },
+  {
+   "start": "0x670000",
+   "end": "0x6c0000",
+   "kind": "game",
+   "name": "App framework (CheatManager, DatabasePackedFile, jobs, PropertyList, LRUCache)",
+   "bytes": 327680,
+   "funcs_union": 1836,
+   "funcs_ghidra": 1545
+  },
+  {
+   "start": "0x6c0000",
+   "end": "0x7c0000",
+   "kind": "game",
+   "name": "Graphics/RenderAsset (Spore renderer: models, materials, effects, rasters)",
+   "bytes": 1048576,
+   "funcs_union": 3223,
+   "funcs_ghidra": 2799
+  },
+  {
+   "start": "0x7c0000",
+   "end": "0x7f0000",
+   "kind": "game",
+   "name": "App config, options, locale, user data, GIF capture",
+   "bytes": 196608,
+   "funcs_union": 884,
+   "funcs_ghidra": 684
+  },
+  {
+   "start": "0x7f0000",
+   "end": "0x838000",
+   "kind": "game",
+   "name": "UI framework glue (debug console, windows, property editor)",
+   "bytes": 294912,
+   "funcs_union": 1787,
+   "funcs_ghidra": 1238
+  },
+  {
+   "start": "0x838000",
+   "end": "0x84c000",
+   "kind": "ea",
+   "name": "ArgScript parser core + EAApp IME",
+   "bytes": 81920,
+   "funcs_union": 481,
+   "funcs_ghidra": 381
+  },
+  {
+   "start": "0x84c000",
+   "end": "0x868000",
+   "kind": "3p",
+   "name": "Gimex (EA image I/O) + libjpeg 6a",
+   "bytes": 114688,
+   "funcs_union": 284,
+   "funcs_ghidra": 249
+  },
+  {
+   "start": "0x868000",
+   "end": "0x87c000",
+   "kind": "3p",
+   "name": "zlib 1.2.3 + libpng 1.2.25",
+   "bytes": 81920,
+   "funcs_union": 195,
+   "funcs_ghidra": 194
+  },
+  {
+   "start": "0x87c000",
+   "end": "0x884000",
+   "kind": "ea",
+   "name": "Gimex glue, locale tables",
+   "bytes": 32768,
+   "funcs_union": 122,
+   "funcs_ghidra": 115
+  },
+  {
+   "start": "0x884000",
+   "end": "0x8d0000",
+   "kind": "ea",
+   "name": "EAText (font server, bitmap/polygon fonts, TrueType/Type1 parsing)",
+   "bytes": 311296,
+   "funcs_union": 982,
+   "funcs_ghidra": 877
+  },
+  {
+   "start": "0x8d0000",
+   "end": "0x8d4000",
+   "kind": "ea",
+   "name": "Input devices (XInput/keyboard maps)",
+   "bytes": 16384,
+   "funcs_union": 91,
+   "funcs_ghidra": 66
+  },
+  {
+   "start": "0x8d4000",
+   "end": "0x8e0000",
+   "kind": "ea",
+   "name": "EA Resource manager (DBPF package records)",
+   "bytes": 49152,
+   "funcs_union": 303,
+   "funcs_ghidra": 233
+  },
+  {
+   "start": "0x8e0000",
+   "end": "0x908000",
+   "kind": "ea",
+   "name": "UTF XHTML browser, CSS, ResourceProvider/HTTP cache",
+   "bytes": 163840,
+   "funcs_union": 737,
+   "funcs_ghidra": 659
+  },
+  {
+   "start": "0x908000",
+   "end": "0x918000",
+   "kind": "3p",
+   "name": "Expat XML parser",
+   "bytes": 65536,
+   "funcs_union": 154,
+   "funcs_ghidra": 101
+  },
+  {
+   "start": "0x918000",
+   "end": "0x924000",
+   "kind": "ea",
+   "name": "EA ExceptionHandler / callstack / minidump",
+   "bytes": 49152,
+   "funcs_union": 321,
+   "funcs_ghidra": 258
+  },
+  {
+   "start": "0x924000",
+   "end": "0x940000",
+   "kind": "ea",
+   "name": "EATrace, EAIO, EACompression (RefPack), EAIniFile, EATextEncoding",
+   "bytes": 114688,
+   "funcs_union": 620,
+   "funcs_ghidra": 540
+  },
+  {
+   "start": "0x940000",
+   "end": "0x950000",
+   "kind": "ea",
+   "name": "UTFInternet (HTTP, network cache, RAS, SSL glue)",
+   "bytes": 65536,
+   "funcs_union": 343,
+   "funcs_ghidra": 246
+  },
+  {
+   "start": "0x950000",
+   "end": "0x9a0000",
+   "kind": "ea",
+   "name": "UTFWin UI toolkit + WinXHTML",
+   "bytes": 327680,
+   "funcs_union": 1948,
+   "funcs_ghidra": 1056
+  },
+  {
+   "start": "0x9a0000",
+   "end": "0xa10000",
+   "kind": "game",
+   "name": "Anim (creature animation, gaits, deform)",
+   "bytes": 458752,
+   "funcs_union": 1314,
+   "funcs_ghidra": 1210
+  },
+  {
+   "start": "0xa10000",
+   "end": "0xa40000",
+   "kind": "game",
+   "name": "Audio system (game side, rw::audio effect configuration)",
+   "bytes": 196608,
+   "funcs_union": 976,
+   "funcs_ghidra": 731
+  },
+  {
+   "start": "0xa40000",
+   "end": "0xa68000",
+   "kind": "ea",
+   "name": "EAPd (EA port of Pure Data, procedural music)",
+   "bytes": 163840,
+   "funcs_union": 840,
+   "funcs_ghidra": 758
+  },
+  {
+   "start": "0xa68000",
+   "end": "0xab8000",
+   "kind": "game",
+   "name": "Swarm effects/particles",
+   "bytes": 327680,
+   "funcs_union": 922,
+   "funcs_ghidra": 742
+  },
+  {
+   "start": "0xab8000",
+   "end": "0xf60000",
+   "kind": "game",
+   "name": "Simulator (all stages, AI, locomotion, Civ/Space, scenario/adventure, plus stage UI)",
+   "bytes": 4882432,
+   "funcs_union": 19209,
+   "funcs_ghidra": 14078
+  },
+  {
+   "start": "0xf60000",
+   "end": "0xfe0000",
+   "kind": "game",
+   "name": "Terrain (planet sphere, effect maps, weather)",
+   "bytes": 524288,
+   "funcs_union": 1333,
+   "funcs_ghidra": 1069
+  },
+  {
+   "start": "0xfe0000",
+   "end": "0x107c000",
+   "kind": "game",
+   "name": "Simulator (Space game tools, cargo, space UI)",
+   "bytes": 638976,
+   "funcs_union": 2176,
+   "funcs_ghidra": 1764
+  },
+  {
+   "start": "0x107c000",
+   "end": "0x112e000",
+   "kind": "3p",
+   "name": "Havok Physics 3.x",
+   "bytes": 729088,
+   "funcs_union": 2132,
+   "funcs_ghidra": 1590
+  },
+  {
+   "start": "0x112e000",
+   "end": "0x1174000",
+   "kind": "ea",
+   "name": "RWAudioCore + EALayer3 / Snd9 / MP3 decoders",
+   "bytes": 286720,
+   "funcs_union": 957,
+   "funcs_ghidra": 713
+  },
+  {
+   "start": "0x1174000",
+   "end": "0x11e0f00",
+   "kind": "3p",
+   "name": "OpenSSL 0.9.8g",
+   "bytes": 446208,
+   "funcs_union": 1647,
+   "funcs_ghidra": 1299
+  },
+  {
+   "start": "0x11e0f00",
+   "end": "0x11e2000",
+   "kind": "crt",
+   "name": "MSVC static CRT pieces (startup, _CI math, EH) + GPU/driver detection",
+   "bytes": 4352,
+   "funcs_union": 55,
+   "funcs_ghidra": 37
+  },
+  {
+   "start": "0x11e2000",
+   "end": "0x11f0000",
+   "kind": "ea",
+   "name": "RenderWare core (D3DX shader compile, threads, file, sync)",
+   "bytes": 57344,
+   "funcs_union": 372,
+   "funcs_ghidra": 340
+  },
+  {
+   "start": "0x11f0000",
+   "end": "0x120b000",
+   "kind": "ea",
+   "name": "RenderWare graphics dx9 driver (shader generator, device)",
+   "bytes": 110592,
+   "funcs_union": 466,
+   "funcs_ghidra": 435
+  },
+  {
+   "start": "0x120b000",
+   "end": "0x13cbf2b",
+   "kind": "init",
+   "name": "Static initialisers / atexit destructors (all modules)",
+   "bytes": 1838891,
+   "funcs_union": 36324,
+   "funcs_ghidra": 14410
+  }
+ ],
+ "totals": {
+  "game": {
+   "bytes": 11448320,
+   "funcs_union": 41750,
+   "funcs_ghidra": 33069
+  },
+  "ea": {
+   "bytes": 1830912,
+   "funcs_union": 8583,
+   "funcs_ghidra": 6677
+  },
+  "3p": {
+   "bytes": 1437440,
+   "funcs_union": 4412,
+   "funcs_ghidra": 3433
+  },
+  "crt": {
+   "bytes": 4352,
+   "funcs_union": 55,
+   "funcs_ghidra": 37
+  },
+  "init": {
+   "bytes": 1838891,
+   "funcs_union": 36324,
+   "funcs_ghidra": 14410
+  }
+ },
+ "union_entries": 91124,
+ "ghidra_entries": 57626
+}
