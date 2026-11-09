@@ -4,7 +4,7 @@ This fork of [spo-re](https://github.com/garnold24/spo-re) builds a native Apple
 
 ## Build on your Mac
 
-You need an Apple Silicon Mac, the Xcode Command Line Tools, Python 3.9 or later, and your own Steam copies of Spore and Galactic Adventures.
+You need an Apple Silicon Mac, the Xcode Command Line Tools, Python 3.11 or later, and your own Steam copies of Spore and Galactic Adventures.
 
 Use a separate copy of the game folder containing `Data`, `DataEP1`, and `SporebinEP1/SporeApp.exe`. The converter expects an already prepared executable from the Steam build below. Preparing the executable is a separate step. This repository contains the recompiler and runtime source.
 

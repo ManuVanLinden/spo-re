@@ -182,8 +182,8 @@ def check_prereqs(a, need_innoextract):
     clang = shutil.which("clang")
     if r.returncode or not clang or subprocess.run(["clang", "--version"], capture_output=True, timeout=60).returncode:
         problems.append("the Command Line Tools are missing: run  xcode-select --install  and try again")
-    if sys.version_info < (3, 9):
-        problems.append("Python 3.9 or newer is needed (this is %s): brew install python3" % platform.python_version())
+    if sys.version_info < (3, 11):
+        problems.append("Python 3.11 or newer is needed (this is %s): brew install python3" % platform.python_version())
     for p in problems:
         print("  missing: " + p)
     if problems:
