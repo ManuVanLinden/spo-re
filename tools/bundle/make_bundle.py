@@ -40,9 +40,9 @@ ROOT = os.path.realpath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
 HERE = os.path.join(ROOT, "tools", "bundle")
 WORK = os.path.realpath(os.environ.get("SPORE_WORK_DIR") or ROOT)
 GAME = os.environ.get("SPORE_GAME_DIR") or os.path.join(ROOT, "game")
-BUNDLE_ID = "com.spore-native.player"
+BUNDLE_ID = "com.spore-native.steam-player"
 NAME = "Spore Native"      # the launcher executable (Contents/MacOS), the log folder name
-DISPLAY_NAME = "Spore"     # CFBundleName/CFBundleDisplayName: what the Dock, the menu bar and Finder show
+DISPLAY_NAME = "Spore Native (Steam)"     # CFBundleName/CFBundleDisplayName: what the Dock, the menu bar and Finder show
 
 # GPU profiles (the runtime table is in runtime/d3d9null/src/d3d9_adapter.c)
 GPU_PROFILES = [("8800gtx", 0x0191, "default: the identity the runtime reports unless told otherwise"),
@@ -72,7 +72,7 @@ def git_version():
         return "0.0-unknown", "0"
     m = re.match(r"v?(\d+(?:\.\d+)*)(?:-|$)", d)
     short = m.group(1) if m else "0.0"
-    return "%s (%s)" % (short, d), n
+    return "%s (%s; Steam fix 1)" % (short, d), str(int(n) + 1)
 
 
 def min_os(binary):
@@ -150,7 +150,7 @@ def info_plist(version, build, minos):
         "CFBundlePackageType": "APPL",
         "CFBundleShortVersionString": version.split(" ")[0],
         "CFBundleVersion": build,
-        "CFBundleGetInfoString": "Spore Native %s: a native runtime for the GOG Spore Galactic Adventures "
+        "CFBundleGetInfoString": "Spore Native %s: a native runtime for this local Steam Galactic Adventures "
                                  "executable. The game itself is not included." % version,
         "CFBundleInfoDictionaryVersion": "6.0",
         "LSMinimumSystemVersion": minos,
@@ -161,8 +161,8 @@ def info_plist(version, build, minos):
         "NSSupportsAutomaticGraphicsSwitching": True,
         "NSDocumentsFolderUsageDescription": "Spore keeps \"My Spore Creations\" (creation cards, pictures and "
                                              "videos) in your Documents folder, as it does on Windows.",
-        "NSDownloadsFolderUsageDescription": "Spore looks for your GOG Spore folder in Downloads.",
-        "NSDesktopFolderUsageDescription": "Spore reads your GOG Spore folder from where you put it.",
+        "NSDownloadsFolderUsageDescription": "Spore looks for your converted Steam Spore folder in Downloads.",
+        "NSDesktopFolderUsageDescription": "Spore reads your converted Steam Spore folder from where you put it.",
     }
 
 

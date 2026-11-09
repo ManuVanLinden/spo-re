@@ -23,3 +23,7 @@ your own copy at build time and writes the app under `build/`. A few small track
 the GOG executable, because the converter needs them: the import table and its addresses
 (`runtime/hle/gen/hle_imports.{c,h}`), the analysts' hand-made import sections (`data/imports-hand.json`), library
 code regions (`data/libraries/text-regions.json`), the two executables' SHA-256 hashes, and individual addresses named in comments of the runtime.
+
+## Local Steam Creature Stage crash guard
+
+The local native guard for guest routine `0x00d65be0` follows the null-target behavior of Rosalie Wanders’ [SporeCrashFix](https://github.com/Rosalie241/SporeCrashFix), revision `6c2532f37669a565f055dea3f69770c6916c4cbc`. The native adaptation is in `runtime/core/src/core_creature_fix.c` under GPL-3.0-only; its license is `runtime/core/CREATURE-FIX-LICENSE.txt`. The original game executable is unchanged.

@@ -78,7 +78,7 @@ typedef struct sg_image_info {
 extern sg_image_info sg_image;
 
 /* Expected SHA-256 of game/SporebinEP1/SporeApp.exe (README). */
-#define SG_IMAGE_SHA256 "dc04aee5a3debc3f1ad4c1a937460e99a29b9bd3bc285008be83615dd5e59a37"
+#define SG_IMAGE_SHA256 "1eef3b46d077d50d7391a972cfb21df23f79e7759a73980211e0598f034e8cf3"
 
 /* Maps the image into the window. `exe_path` is used by SG_IMAGE_FROM_FILE (NULL: $SPORE_EXE, then
  * game/SporebinEP1/SporeApp.exe relative to the source tree the binary was built in). Leaves every image page

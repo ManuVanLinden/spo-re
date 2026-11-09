@@ -17,6 +17,9 @@ WORK = os.environ.get("SPORE_WORK_DIR") or ROOT
 CALL = "SG_CALL(sg_f_00f489e0, 0x11e1061u);"
 HOOK = "SG_CALL(sg_boot_winmain, 0x11e1061u);"
 DECL = "extern void sg_boot_winmain(sg_ctx *ctx, uint8_t *mem);\n"
+CREATURE_ENTRY = "SG_FUNC(00d65be0) {\n"
+CREATURE_GUARD = CREATURE_ENTRY + "    if (sg_creature_buddy_guard(ctx, mem)) return;\n"
+CREATURE_DECL = "extern int sg_creature_buddy_guard(sg_ctx *ctx, uint8_t *mem);\n"
 
 ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
 ap.add_argument("--src", default=os.path.join(WORK, "build", "sporenative", "recomp-512"), help="the translated C")
@@ -25,21 +28,31 @@ a = ap.parse_args()
 a.src, a.out = os.path.abspath(a.src), os.path.abspath(a.out)  # symlink targets must not be relative to a.out
 os.makedirs(a.out, exist_ok=True)
 hits = 0
+creature_hits = 0
 for f in sorted(os.listdir(a.src)):
     if not f.endswith(".c"):
         continue
     s, d = os.path.join(a.src, f), os.path.join(a.out, f)
     text = open(s).read()
-    if CALL in text:
-        hits += text.count(CALL)
-        new = text.replace(CALL, HOOK)
+    new = text
+    declarations = ""
+    if CALL in new:
+        hits += new.count(CALL)
+        new = new.replace(CALL, HOOK)
+        declarations += DECL
+        print("prep_src: %s: %d WinMain call site(s) redirected" % (f, text.count(CALL)))
+    if CREATURE_ENTRY in new:
+        creature_hits += new.count(CREATURE_ENTRY)
+        new = new.replace(CREATURE_ENTRY, CREATURE_GUARD)
+        declarations += CREATURE_DECL
+        print("prep_src: %s: Creature Stage null-buddy guard installed" % f)
+    if new != text:
         i = new.index("SG_DECL(")  # declare next to the first SG_DECL
-        new = new[:i] + DECL + new[i:]
+        new = new[:i] + declarations + new[i:]
         if os.path.islink(d) or (os.path.exists(d) and open(d).read() != new):
             os.unlink(d)
         if not os.path.exists(d):
             open(d, "w").write(new)
-        print("prep_src: %s: %d WinMain call site(s) redirected" % (f, text.count(CALL)))
     else:
         if os.path.islink(d) and os.readlink(d) == s:
             continue
@@ -48,3 +61,5 @@ for f in sorted(os.listdir(a.src)):
         os.symlink(s, d)
 if hits != 1:
     sys.exit("prep_src: expected exactly one WinMain call site, found %d" % hits)
+if creature_hits != 1:
+    sys.exit("prep_src: expected exactly one Creature Stage entry, found %d" % creature_hits)

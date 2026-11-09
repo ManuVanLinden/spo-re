@@ -238,6 +238,43 @@ static void test_input(void)
     CHECK(sp_get_key_state('A') >= 0 && sp_get_focus() == 0);
 }
 
+static void test_azerty(void)
+{
+    setup();
+    setenv("SPORE_KEYBOARD_LAYOUT", "azerty", 1);
+    const struct { uint16_t mac; uint8_t vk, scan; } keys[] = {
+        {0x0d, 'Z', 0x11}, {0x00, 'Q', 0x1e}, {0x01, 'S', 0x1f}, {0x02, 'D', 0x20},
+        {0x0c, 'A', 0x10}, {0x0e, 'E', 0x12}, {0x06, 'W', 0x2c}, {0x29, 'M', 0x27},
+    };
+    for (unsigned i = 0; i < sizeof keys / sizeof *keys; i++) {
+        sp_keyinfo k;
+        CHECK(sp_keymap_lookup(keys[i].mac, NULL, &k));
+        CHECK(k.vk == keys[i].vk && k.vk_specific == k.vk && k.scan == keys[i].scan);
+        uint16_t text = (uint16_t)(keys[i].vk + ('a' - 'A'));
+        sp_input_key(keys[i].mac, SP_KEY_DOWN, &text, 1, &text, 1);
+        sp_msg m;
+        CHECK(sp_peek_message(&m, 0, WM_KEYDOWN, WM_KEYDOWN, PM_REMOVE));
+        CHECK(m.wParam == keys[i].vk && ((m.lParam >> 16) & 255) == keys[i].scan);
+        CHECK(sp_get_async_key_state(keys[i].vk) < 0 && sp_get_key_state(keys[i].vk) < 0);
+        sp_translate_message(&m);
+        CHECK(sp_peek_message(&m, 0, WM_CHAR, WM_CHAR, PM_REMOVE) && m.wParam == text);
+        sp_input_key(keys[i].mac, SP_KEY_UP, NULL, 0, NULL, 0);
+        CHECK(sp_peek_message(&m, 0, WM_KEYUP, WM_KEYUP, PM_REMOVE) && m.wParam == keys[i].vk);
+        CHECK(sp_get_async_key_state(keys[i].vk) >= 0 && sp_get_key_state(keys[i].vk) >= 0);
+    }
+    /* The physical French A must produce Ctrl+A, not the US-position Ctrl+Q. */
+    sp_input_modifier(0x3b, 1);
+    sp_input_key(0x0c, SP_KEY_DOWN, (uint16_t[]){'a'}, 1, NULL, 0);
+    sp_msg m;
+    while (sp_peek_message(&m, 0, WM_KEYDOWN, WM_KEYDOWN, PM_REMOVE)) sp_translate_message(&m);
+    CHECK(sp_peek_message(&m, 0, WM_CHAR, WM_CHAR, PM_REMOVE) && m.wParam == 1);
+    sp_input_key(0x0c, SP_KEY_UP, NULL, 0, NULL, 0);
+    sp_input_modifier(0x3b, 0);
+    unsetenv("SPORE_KEYBOARD_LAYOUT");
+    sp_keyinfo k;
+    CHECK(sp_keymap_lookup(0x0d, NULL, &k) && k.vk == 'W');
+}
+
 /* ---- DirectSound without a device ----------------------------------------------------------- */
 static void test_dsound(void)
 {
@@ -334,6 +371,7 @@ int main(void)
     printf("test_filters\n"); test_filters();
     printf("test_threads\n"); test_threads();
     printf("test_input\n"); test_input();
+    printf("test_azerty\n"); test_azerty();
     printf("test_dsound\n"); test_dsound();
     printf("%d passed, %d failed\n", g_pass, g_fail);
     return g_fail != 0;

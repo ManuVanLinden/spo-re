@@ -84,10 +84,10 @@ try:
     empty = os.path.join(T, "no-game")
     os.makedirs(empty)
     rc, out = convert(empty, *common, "--dry-run")
-    check(rc == 1 and "SporebinEP1" in out and "GOG" in out, "a folder without SporebinEP1 is refused", out)
+    check(rc == 1 and "SporebinEP1" in out and "prepared Steam" in out, "a folder without SporebinEP1 is refused", out)
     wrong = install(os.path.join(T, "wrong-bytes"), exe="fake")
     rc, out = convert(wrong, *common, "--dry-run")
-    check(rc == 1 and "not the GOG build of Spore Galactic Adventures" in out,
+    check(rc == 1 and "does not match the prepared Steam image" in out,
           "an exe with the right name and wrong bytes is refused", out)
     noep1 = os.path.join(T, "no-ep1")
     os.makedirs(os.path.join(noep1, "SporebinEP1"))
@@ -97,12 +97,12 @@ try:
     check(rc == 1 and "DataEP1" in out, "a folder without DataEP1 is refused (Galactic Adventures required)", out)
     good = install(os.path.join(T, "good"))
     rc, out = convert(os.path.join(good, "SporebinEP1"), *common, "--dry-run")
-    check(rc == 0 and "(GOG): %s (" % good in out, "the SporebinEP1 folder itself is normalised to its parent", out)
+    check(rc == 0 and "(local Steam conversion): %s (" % good in out, "the SporebinEP1 folder itself is normalised to its parent", out)
     parent = os.path.join(T, "downloads")
     inner = install(os.path.join(parent, "Spore"))
     os.makedirs(os.path.join(parent, "other"))
     rc, out = convert(parent, *common, "--dry-run")
-    check(rc == 0 and "(GOG): %s (" % inner in out, "a folder with exactly one install inside is taken", out)
+    check(rc == 0 and "(local Steam conversion): %s (" % inner in out, "a folder with exactly one install inside is taken", out)
     check("warning: no SporeBin/SporeApp.exe" in out, "a missing base-game exe is a warning, not a refusal", out)
 
     print("(b) --dry-run")
@@ -138,10 +138,10 @@ try:
         rc, out = convert(GAME, *common, "--timeout", "590", timeout=600)
         skipped = re.findall(r"^\s*\d+/\d+\s+(\w+).*skipped \(up to date\)", out, re.M)
         check(rc == 0 and skipped == ORDER, "a second run skips every stage (%d of %d)" % (len(skipped), len(ORDER)), out)
-        check("Open Spore.app to play." in out, "the run ends with the closing line", out)
+        check("Open Spore Native (Steam).app to play." in out, "the run ends with the closing line", out)
 
         print("(e) the app")
-        app = os.path.join(OUT, "Spore.app")
+        app = os.path.join(OUT, "Spore Native (Steam).app")
         r = subprocess.run([sys.executable, "-P", os.path.join(ROOT, "tools", "bundle", "make_bundle.py"), "--verify-only",
                             "--out", app, "--game-dir", GAME], capture_output=True, text=True, timeout=600, env=env())
         check(r.returncode == 0 and "result: all checks pass" in r.stdout, "make_bundle.py --verify-only passes",

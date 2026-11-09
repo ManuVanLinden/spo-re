@@ -149,8 +149,7 @@ address.
 [`sp_keymap.c`](../../runtime/platform/macos/src/sp_keymap.c) maps 119 macOS key codes. The source tables are
 `kVK_*` from HIToolbox/Events.h and the VK and scan codes from Microsoft's documentation.
 
-- **Positional (US) VKs.** Scan codes are positional on Windows too. Letter VKs follow the US layout; a
-  layout-aware VK for AZERTY and similar layouts is remaining work.
+- **Keyboard layout.** Scan codes remain positional. With `SPORE_KEYBOARD_LAYOUT=azerty`, letter VKs follow French AZERTY (including A/Q, Z/W, and M), while AppKit supplies text. Other settings retain the US VK table. The local Steam launcher defaults to AZERTY and uses the existing ZQSD trigger resource.
 - **Extended keys** carry lParam bit 24: arrows, Home/End/PgUp/PgDn, Help→Insert, forward-delete→Delete,
   keypad Enter and `/`, right Ctrl/Alt, Win.
 - **Num Lock** has no Mac key. It is reported toggled on, so the keypad gives `VK_NUMPAD0–9` and digits.

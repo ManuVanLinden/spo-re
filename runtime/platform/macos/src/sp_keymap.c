@@ -13,6 +13,7 @@
 #include "sp_platform.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 typedef struct { uint8_t vk, scan, ext; } kent;
@@ -136,6 +137,22 @@ int sp_keymap_lookup(uint16_t kvk, const sp_input_config *cfg, sp_keyinfo *out)
     out->vk_specific = e->vk;
     out->scan = e->scan;
     out->ext = e->ext;
+    /* Keep physical scan codes, but report French letter VKs to the game's
+     * ZQSD trigger resource. Text still comes from AppKit's characters. */
+    const char *layout = getenv("SPORE_KEYBOARD_LAYOUT");
+    if (layout && !strcmp(layout, "azerty")) {
+        switch (kvk) {
+        case 0x00: out->vk = 'Q'; break;
+        case 0x0C: out->vk = 'A'; break;
+        case 0x0D: out->vk = 'Z'; break;
+        case 0x06: out->vk = 'W'; break;
+        case 0x29: out->vk = 'M'; break;
+        case 0x2E: out->vk = VK_OEM_COMMA; break;
+        case 0x2B: out->vk = VK_OEM_1; break;
+        default: break;
+        }
+        out->vk_specific = out->vk;
+    }
     return 1;
 }
 

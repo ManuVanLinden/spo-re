@@ -11,6 +11,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "sgp_int.h"
 #include "sgp_clipboard.h"
@@ -289,7 +290,10 @@ SG_IMPORT(user32, GetKeyboardState) {
 }
 /* US layout, en-US (0x849c08 keeps the low word as the language for GetLocaleInfoW). A
  * layout-aware VK map is remaining work (platform-macos.md section 4). */
-SG_IMPORT(user32, GetKeyboardLayout) { SG_RETURN_STDCALL(0x04090409u, 4); }
+SG_IMPORT(user32, GetKeyboardLayout) {
+    const char *layout = getenv("SPORE_KEYBOARD_LAYOUT");
+    SG_RETURN_STDCALL(layout && !strcmp(layout, "azerty") ? 0x040c040cu : 0x04090409u, 4);
+}
 
 /* ---- mouse and cursor ---------------------------------------------------------------------------- */
 SG_IMPORT(user32, SetCapture) {

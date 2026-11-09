@@ -719,6 +719,7 @@ static int is_move(NSEventType t)
 static void route(NSEvent *e)
 {
     NSEventType t = e.type;
+    sp_keyinfo command_key;
     if (t == NSEventTypeApplicationDefined && e.subtype == SP_WAKE_SUBTYPE) return;
     int synth = e.timestamp >= SP_MAC_SYNTH_TS;
     if (!synth && g_cursor_scripted && is_input(t) && t != NSEventTypeKeyDown && t != NSEventTypeKeyUp &&
@@ -731,7 +732,8 @@ static void route(NSEvent *e)
     if (!s || !is_input(t)) { [NSApp sendEvent:e]; return; }
     switch (t) {
     case NSEventTypeKeyDown:
-        if ((e.modifierFlags & NSEventModifierFlagCommand) && e.keyCode == 0x0C) {   /* Cmd+Q */
+        if ((e.modifierFlags & NSEventModifierFlagCommand) &&
+            sp_keymap_lookup(e.keyCode, NULL, &command_key) && command_key.vk == 'Q') { /* Cmd+Q in the selected layout */
             sgp_host_close_request(s->h, "Cmd-Q");
             return;
         }

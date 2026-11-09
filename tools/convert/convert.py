@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
-"""One command from your own GOG Spore Galactic Adventures install to the native app.
+"""Build the native app from your prepared Steam Spore Galactic Adventures folder.
 
-    python3 -P tools/convert/convert.py <gog-folder | setup_spore*.exe> [-o DIR]
+    python3 -P tools/convert/convert.py <prepared-steam-folder> [-o DIR]
 
-Writes Spore.app into the current folder, or into DIR with -o/--output. The user's guide is
-tools/convert/README.md (the top-level README); the design (stages, the SPORE_WORK_DIR convention, resumption, the
+Writes Spore Native (Steam).app into the current folder, or into DIR with -o/--output. The user's guide is
+README.md; the design (stages, the SPORE_WORK_DIR convention, resumption, the
 files the converter needs) is docs/design/convert.md.
 
 Input: the folder holding SporebinEP1/SporeApp.exe, Data/ and DataEP1/ (or its SporebinEP1 folder, or a folder with
-exactly one such install inside), or the GOG offline installer (setup_spore*.exe with its .bin files beside it, or
-the folder holding them), which is extracted with innoextract to --extract-to (default
-~/Library/Application Support/spore-native/game) first. The EP1 exe's SHA-256 must be the GOG build's
-(SG_IMAGE_SHA256 in runtime/image/include/sg_image.h); anything else is refused.
+exactly one such install inside). The EP1 exe must match the prepared Steam image pinned by SG_IMAGE_SHA256 in
+runtime/image/include/sg_image.h. The original Steam executable requires separate preparation.
 
 Stages (each prints one line with its duration; the tools' own output goes to <work>/log/<stage>.log):
   extract    the installer only: innoextract into --extract-to
@@ -22,7 +20,7 @@ Stages (each prints one line with its duration; the tools' own output goes to <w
   translate  tools/link/build.py --tus 512 --translate-only         every function to C (the longest stage with link)
   harness    tools/harness/prep_src.py                              the WinMain boot hook
   link       tools/link/build.py --src <work>/build/harness/src     compile, link, loader smoke run and self-test
-  bundle     tools/bundle/make_bundle.py --out <output>/Spore.app   the app, signed and checked
+  bundle     tools/bundle/make_bundle.py                             the app, signed and checked
   settings   <support>/game-dir                                     so the first launch does not ask
 
 All generated files go under the work folder (--work, default
@@ -49,7 +47,9 @@ ROOT = os.path.realpath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
 HERE = os.path.join(ROOT, "tools", "convert")
 DEPS = os.path.join(ROOT, "tools", ".deps")
 BREWFILE = os.path.join(HERE, "Brewfile")
-BASE_SHA256 = "25d42a7a5c4d438fb155233230f57d29e2849bfdff5c889a5d0847f0469d914e"   # README.md "Target"
+BASE_SHA256 = "f9716458cdc232a507686dcb490e75680c514e31a5b1f33601b0dfcd05baf75d"   # README.md "Target"
+APP_BUNDLE = "Spore Native (Steam).app"
+SUPPORT_DIR = "~/Library/Application Support/spore-native-steam"
 TUS = 512
 PIP_LINE = "python3 -m pip install --target tools/.deps capstone==5.0.3"
 STAGES = ["extract", "manifest", "eh", "imports", "threads", "translate", "harness", "link", "bundle",
@@ -63,7 +63,7 @@ DESC = {
     "translate": "translate the exe into C (512 files)",
     "harness": "boot harness",
     "link": "compile and link",
-    "bundle": "build and check Spore.app",
+    "bundle": "build and check " + APP_BUNDLE,
     "settings": "remember the Spore folder for the first launch",
 }
 
@@ -122,8 +122,8 @@ def find_install(path):
     if len(inside) > 1:
         raise Refuse("%s holds %d Spore installs (%s); name the one to convert" % (
             path, len(inside), ", ".join(os.path.basename(i) for i in inside)))
-    raise Refuse("%s: %s. Give the folder of a GOG Spore Galactic Adventures install (the one holding SporebinEP1, "
-                 "Data and DataEP1), or the GOG offline installer (setup_spore*.exe)" % (path, why))
+    raise Refuse("%s: %s. Give the prepared Steam Spore Galactic Adventures folder "
+                 "(the one holding SporebinEP1, Data and DataEP1)" % (path, why))
 
 
 def installer_in(path):
@@ -147,14 +147,14 @@ def check_exes(game):
     want = exe_sha256_expected()
     got = sha256(exe)
     if got != want:
-        raise Refuse("%s is not the GOG build of Spore Galactic Adventures (SHA-256 %s, expected %s). Only the GOG "
-                     "build is accepted: the Steam, EA app and disc versions are not." % (exe, got, want))
+        raise Refuse("%s does not match the prepared Steam image for Galactic Adventures "
+                     "(SHA-256 %s, expected %s). See README.md for the required input." % (exe, got, want))
     base = os.path.join(game, "SporeBin", "SporeApp.exe")
     if os.path.isfile(base):
         got = sha256(base)
         if got != BASE_SHA256:
-            raise Refuse("%s is not the GOG build of Spore (SHA-256 %s, expected %s). Only the GOG build is "
-                         "accepted." % (base, got, BASE_SHA256))
+            raise Refuse("%s does not match the expected Steam base game (SHA-256 %s, expected %s)." %
+                         (base, got, BASE_SHA256))
         return exe, want, "base game exe checked"
     return exe, want, "warning: no SporeBin/SporeApp.exe (base game) in %s; only the Galactic Adventures exe was checked" % game
 
@@ -241,7 +241,7 @@ class Pipeline:
     def __init__(self, a, game, exe, installer):
         self.a, self.game, self.exe, self.installer = a, game, exe, installer
         self.work = a.work
-        self.app = os.path.join(a.output, "Spore.app")
+        self.app = os.path.join(a.output, APP_BUNDLE)
         W = lambda *p: os.path.join(self.work, *p)  # noqa: E731
         R = lambda *p: os.path.join(ROOT, *p)  # noqa: E731
         self.W = W
@@ -311,7 +311,7 @@ class Pipeline:
         return " && ".join(parts)
 
     def game_dir_file(self):
-        sup = os.environ.get("SPORE_SUPPORT_DIR") or os.path.expanduser("~/Library/Application Support/spore-native")
+        sup = os.environ.get("SPORE_SUPPORT_DIR") or os.path.expanduser(SUPPORT_DIR)
         return os.path.join(sup, "game-dir")
 
     def env(self):
@@ -339,7 +339,7 @@ class Pipeline:
         return 0 if all(os.path.exists(o) for o in outs) else (rc or 1)
 
     def write_game_dir(self, log):
-        """<support>/game-dir (SPORE_SUPPORT_DIR or ~/Library/Application Support/spore-native) = the Spore folder"""
+        """Remember the selected game folder for the launcher."""
         f = self.game_dir_file()
         os.makedirs(os.path.dirname(f), exist_ok=True)
         with open(f + ".tmp", "w") as o:
@@ -466,11 +466,11 @@ def free_gb(path):
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Turn your GOG Spore Galactic Adventures install into a native Mac app.",
-                                 epilog="Guide: tools/convert/README.md")
-    ap.add_argument("input", nargs="?", help="the GOG Spore folder (holding SporebinEP1, Data, DataEP1) or the GOG "
-                    "installer setup_spore*.exe (its .bin files beside it)")
-    ap.add_argument("-o", "--output", default=".", help="folder to write Spore.app into (default: the current folder)")
+    ap = argparse.ArgumentParser(description="Build a native Mac app from your prepared Steam Spore folder.",
+                                 epilog="Guide: README.md")
+    ap.add_argument("input", nargs="?", help="the prepared Steam folder (holding SporebinEP1, Data, DataEP1)")
+    ap.add_argument("-o", "--output", default=".",
+                    help="folder to write " + APP_BUNDLE + " into (default: the current folder)")
     ap.add_argument("--work", help="work folder (default ~/Library/Caches/com.spore-native.converter/<exe hash>)")
     ap.add_argument("--extract-to", default=os.path.expanduser("~/Library/Application Support/spore-native/game"),
                     help="installer input: where the game is extracted (the app reads it from there)")
@@ -489,7 +489,7 @@ def main():
         print("spore-native converter %s" % version())
         return 0
     if not a.input:
-        ap.error("name your GOG Spore folder or installer")
+        ap.error("name your prepared Steam Spore folder")
     if a.stage and a.until:
         ap.error("--stage and --until do not go together")
     a.jobs = a.jobs or default_jobs()
@@ -516,10 +516,10 @@ def main():
         return 1
     a.work = os.path.abspath(os.path.expanduser(a.work or os.path.join(
         "~/Library/Caches/com.spore-native.converter", digest[:12])))
-    if os.path.realpath(os.path.join(a.output, "Spore.app")) == os.path.realpath(os.path.join(ROOT, "build", "Spore.app")) \
+    if os.path.realpath(os.path.join(a.output, APP_BUNDLE)) == os.path.realpath(os.path.join(ROOT, "build", "Spore.app")) \
             and not a.force:
         print("convert: %s is the development bundle; write elsewhere with -o, or pass --force" %
-              os.path.join(a.output, "Spore.app"), file=sys.stderr)
+              os.path.join(a.output, APP_BUNDLE), file=sys.stderr)
         return 1
 
     todo = [s for s in STAGES if s != "extract" or installer]
@@ -535,7 +535,7 @@ def main():
         todo = todo[:todo.index(a.until) + 1]
 
     pipe = Pipeline(a, game, exe, installer)
-    print("Spore Galactic Adventures (GOG): %s (%s)" % (game, note))
+    print("Spore Galactic Adventures (local Steam conversion): %s (%s)" % (game, note))
     if installer:
         print("installer: %s, extracted to %s" % (installer, a.extract_to))
     print("app: %s" % pipe.app)
@@ -584,7 +584,7 @@ def main():
         print("Your app: %s" % pipe.app)
     if "settings" in todo:
         print("Spore folder: %s (remembered in %s)" % (game, pipe.game_dir_file()))
-        print("Open Spore.app to play.")
+        print("Open %s to play." % APP_BUNDLE)
     return 0
 
 

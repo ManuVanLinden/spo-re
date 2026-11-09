@@ -140,3 +140,8 @@ These are gaps this build has not closed; the rows above are deliberate.
 - The display mode is never switched (4.1); fullscreen is a borderless window.
 - `ShellExecuteW` (2.10): `mailto:` and local files stay refused.
 - The adapter identity (3.1) is one of three NVIDIA profiles; no identity is derived from the Mac's own GPU.
+
+## Local Steam build repairs
+
+- The cdecl routine at `0x00d65be0` returns true immediately when its third argument is null, following SporeCrashFix. This avoids the observed null dereference at `0x00d65d23` during Creature Stage buddy updates. Present targets execute the original translated body.
+- The launcher defaults `SPORE_KEYBOARD_LAYOUT=azerty`. The platform reports French letter VKs while retaining physical scan codes and AppKit text. The existing ZQSD trigger package supplies the game bindings, with A/E strafing. Cmd-Q follows the selected letter layout. The keyboard-layout API reports French when AZERTY is selected.

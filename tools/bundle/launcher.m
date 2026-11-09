@@ -1,7 +1,7 @@
 /* launcher.m -- Contents/MacOS/Spore Native, the app bundle's main executable (docs/design/bundle.md).
  *
  * Finds the player's GOG Spore folder, sets up the environment the runtime reads, sends stdout and stderr to
- * ~/Library/Logs/Spore Native/, and execs the game binary (Contents/MacOS/spore-game --run) in the same
+ * ~/Library/Logs/Spore Native Steam/, and execs the game binary (Contents/MacOS/spore-game --run) in the same
  * process, so the Dock, the menu bar and macOS's privacy prompts all see one app.
  *
  * Command line: --help, --version, --game-dir PATH (use and remember), --reset-game-dir,
@@ -14,12 +14,12 @@
  *   0. --game-dir PATH (checked first; a bad folder is an error, exit 1)
  *   1. $SPORE_GAME_DIR (an explicit override, as for development runs)
  *   2. the folder remembered in <support>/game-dir (<support> = $SPORE_SUPPORT_DIR or
- *      ~/Library/Application Support/spore-native)
+ *      ~/Library/Application Support/spore-native-steam)
  *   3. the usual places: ~/Downloads/spore-gog, ~/Applications and /Applications ("Spore", "Spore Galactic
  *      Adventures", ...), ~/GOG Games, /Users/Shared/GOG Galaxy/Games
  *   4. a native open panel asking for the folder that contains SporebinEP1 (remembered once it checks out).
  *
- * Settings (defaults domain com.spore-native.player, or $SPORE_DEFAULTS_DOMAIN for tests; the environment always
+ * Settings (defaults domain com.spore-native.steam-player, or $SPORE_DEFAULTS_DOMAIN for tests; the environment always
  * wins over a setting):
  *   GPUProfile        -> SPORE_GPU_PROFILE (8800gtx | 9800gtx | gtx280; checked against the install's
  *                        Data/Config/VideoCards.txt at run time)
@@ -72,13 +72,13 @@
 #define CAP 2048
 
 /* The settings domain. SPORE_DEFAULTS_DOMAIN replaces it (test_launcher.py uses a throwaway domain, so the
- * tests never read or write the player's com.spore-native.player). */
+ * tests never read or write the player's com.spore-native.steam-player). */
 static CFStringRef pref_domain(void) {
     static CFStringRef d;
     if (!d) {
         const char *e = getenv("SPORE_DEFAULTS_DOMAIN");
         d = (e && *e) ? CFStringCreateWithCString(NULL, e, kCFStringEncodingUTF8) : NULL;
-        if (!d) d = CFSTR("com.spore-native.player");
+        if (!d) d = CFSTR("com.spore-native.steam-player");
     }
     return d;
 }
@@ -114,7 +114,7 @@ static void trim(char *s) {
 static void support_dir(char *out, size_t cap) {
     const char *s = getenv("SPORE_SUPPORT_DIR");
     if (s && *s) snprintf(out, cap, "%s", s);
-    else snprintf(out, cap, "%s/Library/Application Support/spore-native", g_home);
+    else snprintf(out, cap, "%s/Library/Application Support/spore-native-steam", g_home);
 }
 
 /* ---- settings (CFPreferences, so the test binary outside the bundle reads the same domain) ----------- */
@@ -168,7 +168,7 @@ static const char *check_game_dir(const char *dir) {
     CC_SHA256(m, (CC_LONG)st.st_size, md);
     munmap(m, (size_t)st.st_size);
     for (int i = 0; i < 32; i++) snprintf(hex + 2 * i, 3, "%02x", md[i]);
-    if (strcmp(hex, SPORE_EXE_SHA256)) return "SporebinEP1/SporeApp.exe is not the GOG Spore Galactic Adventures build";
+    if (strcmp(hex, SPORE_EXE_SHA256)) return "SporebinEP1/SporeApp.exe does not match this local Steam conversion";
     return NULL;
 }
 
@@ -250,7 +250,7 @@ static int ask_for_folder(char *out, size_t cap) {
             p.allowsMultipleSelection = NO;
             p.canCreateDirectories = NO;
             p.title = @"Where is Spore?";
-            p.message = @"Spore needs the Spore Galactic Adventures folder from GOG: the folder that contains "
+            p.message = @"Spore needs the converted Steam Galactic Adventures folder: the folder that contains "
                         @"SporebinEP1, Data and DataEP1. Nothing is copied; the game is read from there.";
             p.prompt = @"Use This Folder";
             p.directoryURL = [NSURL fileURLWithPath:start isDirectory:YES];
@@ -262,7 +262,7 @@ static int ask_for_folder(char *out, size_t cap) {
             if (!why) return 1;
             char msg[CAP + 256];
             snprintf(msg, sizeof msg, "%s: %s.\n\nChoose the folder that contains SporebinEP1, Data and DataEP1 "
-                                      "(the GOG Spore install).", p.URL.path.fileSystemRepresentation, why);
+                                      "(the converted Steam install).", p.URL.path.fileSystemRepresentation, why);
             alert("That folder is not a Spore install", msg);
             start = p.URL.path;
         }
@@ -349,7 +349,7 @@ static void open_log(char *out, size_t cap) {
     char dir[CAP];
     const char *ld = getenv("SPORE_LOG_DIR");
     if (ld && *ld) snprintf(dir, sizeof dir, "%s", ld);
-    else snprintf(dir, sizeof dir, "%s/Library/Logs/Spore Native", g_home);
+    else snprintf(dir, sizeof dir, "%s/Library/Logs/Spore Native Steam", g_home);
     mkdir_p(dir);
     prune_logs(dir, 29);
     if (lf && *lf) snprintf(out, cap, "%s", lf);
@@ -492,7 +492,7 @@ static const srow k_rows[] = {
     {"General", "Connect to EA's servers", R_CHECK, "SPORE_ONLINE", "on", "0", NULL,
      "Needed for Sporepedia sharing and your EA account."},
     {"General", "Spore folder", R_GAMEDIR, "game-dir", "", NULL, NULL,
-     "Your GOG Spore Galactic Adventures folder, the one with SporebinEP1, Data and DataEP1."},
+     "The converted Steam game folder, with SporebinEP1, Data and DataEP1."},
     {"General", "Save creations in", R_DOCS, "DocumentsFolder", "", NULL, NULL,
      "Your creations go in a \"My Spore Creations\" folder here."},
     {"Diagnostics", "Log network activity", R_POPUP, "SPORE_NET_LOG", "", NULL,
@@ -1561,7 +1561,7 @@ static void usage(FILE *o) {
     fprintf(o,
             "usage: \"Spore Native\" [options] [-- game arguments]\n"
             "\n"
-            "Starts Spore Galactic Adventures (GOG) through Spore Native %s.\n"
+            "Starts Spore Galactic Adventures (Steam conversion) through Spore Native %s.\n"
             "\n"
             "options:\n"
             "  --help             show this text and exit\n"
@@ -1582,12 +1582,12 @@ static void usage(FILE *o) {
             "(ShowSettings); holding Option at start shows it too. Play saves and starts, Cancel writes nothing and\n"
             "starts nothing. The log is opened after the window closes, so a Cancel leaves no log file.\n"
             "\n"
-            "settings: defaults write com.spore-native.player GPUProfile 8800gtx|9800gtx|gtx280\n"
-            "          defaults write com.spore-native.player DocumentsFolder PATH\n"
-            "          defaults write com.spore-native.player Environment -dict NAME VALUE ...\n"
-            "          defaults write com.spore-native.player Arguments -array ARG ...\n"
-            "          defaults write com.spore-native.player ShowSettings -bool false\n"
-            "logs:     ~/Library/Logs/Spore Native/ (SPORE_LOG_FILE=- keeps this terminal)\n",
+            "settings: defaults write com.spore-native.steam-player GPUProfile 8800gtx|9800gtx|gtx280\n"
+            "          defaults write com.spore-native.steam-player DocumentsFolder PATH\n"
+            "          defaults write com.spore-native.steam-player Environment -dict NAME VALUE ...\n"
+            "          defaults write com.spore-native.steam-player Arguments -array ARG ...\n"
+            "          defaults write com.spore-native.steam-player ShowSettings -bool false\n"
+            "logs:     ~/Library/Logs/Spore Native Steam/ (SPORE_LOG_FILE=- keeps this terminal)\n",
             SPORE_BUNDLE_VERSION);
 }
 
@@ -1689,6 +1689,7 @@ int main(int argc, char **argv) {
         { char t[CAP]; if (realpath(contents, t)) snprintf(contents, sizeof contents, "%s", t); }
 
         apply_pref_environment();
+        set_default_env("SPORE_KEYBOARD_LAYOUT", "azerty");
 
         char game[CAP], reason[CAP];
         if (resolve_only) {
@@ -1750,7 +1751,7 @@ int main(int argc, char **argv) {
             char d[CAP];
             if (pref_string(CFSTR("DocumentsFolder"), d, sizeof d)) {
                 if (d[0] == '~') { char t[CAP]; snprintf(t, sizeof t, "%s%s", g_home, d + 1); snprintf(d, sizeof d, "%s", t); }
-            } else snprintf(d, sizeof d, "%s/Documents", g_home);
+            } else { char sd[CAP]; support_dir(sd, sizeof sd); snprintf(d, sizeof d, "%s/Documents", sd); mkdir_p(d); }
             if (writable_docs(d)) {
                 char old[CAP], sup2[CAP];
                 setenv("SPORE_DOCUMENTS_DIR", d, 1);
@@ -1759,14 +1760,14 @@ int main(int argc, char **argv) {
                 if (is_dir(old))
                     fprintf(stderr, "spore-launcher: note: development runs keep \"My Spore Creations\" in %s; the "
                                     "bundle uses %s/My Spore Creations (copy files across to keep them together, or "
-                                    "defaults write com.spore-native.player DocumentsFolder \"%s/Documents\")\n",
+                                    "defaults write com.spore-native.steam-player DocumentsFolder \"%s/Documents\")\n",
                             old, d, sup2);
             }
             else fprintf(stderr, "spore-launcher: %s is not writable (privacy setting?); \"My Spore Creations\" stays "
                                  "in the Application Support folder\n", d);
         }
         char caches[CAP];
-        snprintf(caches, sizeof caches, "%s/Library/Caches/com.spore-native.player", g_home);
+        snprintf(caches, sizeof caches, "%s/Library/Caches/com.spore-native.steam-player", g_home);
         snprintf(p, sizeof p, "%s/shadercache", caches);
         set_default_env("SPORE_D3D9MSL_CACHE", p);
         set_default_env("SPORE_REPO_ROOT", caches); /* writable state a back end keeps under build/ goes here */
@@ -1774,7 +1775,7 @@ int main(int argc, char **argv) {
             char ld[CAP];
             const char *e = getenv("SPORE_LOG_DIR");
             if (e && *e) snprintf(ld, sizeof ld, "%s", e);
-            else snprintf(ld, sizeof ld, "%s/Library/Logs/Spore Native", g_home);
+            else snprintf(ld, sizeof ld, "%s/Library/Logs/Spore Native Steam", g_home);
             snprintf(p, sizeof p, "%s/dispatch-misses.txt", ld);
             set_default_env("SPORE_MISS_LOG", p);
         }
@@ -1782,6 +1783,7 @@ int main(int argc, char **argv) {
 
         char sup[CAP];
         support_dir(sup, sizeof sup);
+        set_default_env("SPORE_SUPPORT_DIR", sup);
         mkdir_p(sup);
         if (chdir(sup)) (void)chdir("/");
 
@@ -1809,7 +1811,7 @@ int main(int argc, char **argv) {
             if (line.length) set_default_env("SPORE_ARGS", line.UTF8String);
         }
 
-        static const char *shown[] = {"SPORE_GAME_DIR", "SPORE_EXE", "SPORE_DOCUMENTS_DIR", "SPORE_SUPPORT_DIR",
+        static const char *shown[] = {"SPORE_GAME_DIR", "SPORE_EXE", "SPORE_DOCUMENTS_DIR", "SPORE_SUPPORT_DIR", "SPORE_KEYBOARD_LAYOUT",
                                       "SPORE_D3D9", "SPORE_GPU_PROFILE", "SPORE_D3D9MSL_CACHE", "SPORE_REPO_ROOT",
                                       "SPORE_MISS_LOG",
                                       /* the settings window's switches */
